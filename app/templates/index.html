@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wake-on-LAN Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Wake-on-LAN Dashboard</h1>
+      <div id="gns3"></div>
+    </header>
+    <main>
+      <table id="devices">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Name</th>
+            <th>IP</th>
+            <th>System</th>
+            <th>GNS3</th>
+            <th>MAC</th>
+            <th>Last Seen</th>
+            <th>Aktion</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </main>
+    <footer>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button id="scanNowBtn" title="Scan jetzt ausführen">Scan jetzt</button>
+        <small>Automatischer Scan alle <span id="interval"></span>s</small>
+      </div>
+    </footer>
+    <script src="/static/app.js"></script>
+  </body>
+  </html>

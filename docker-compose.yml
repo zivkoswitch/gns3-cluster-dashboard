@@ -1,0 +1,48 @@
+# Docker Compose for WoL dashboard
+# Usage:
+#  - Default (bridge): docker compose up -d
+#  - Linux host network: docker compose --profile hostnet up -d
+
+version: "3.9"
+
+services:
+  wol-dashboard:
+    build:
+      context: .
+      network: host
+      args:
+        - HTTP_PROXY
+        - HTTPS_PROXY
+        - NO_PROXY
+    image: wol-dashboard:latest
+    container_name: wol-dashboard
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - SCAN_INTERVAL=30
+      - CONFIG_PATH=/app/config/devices.yaml
+      - PORT=8000
+    volumes:
+      - ./config:/app/config:ro
+
+  # Optional: host networking for Linux to improve UDP broadcast reachability
+  wol-dashboard-host:
+    profiles: ["hostnet"]
+    build:
+      context: .
+      network: host
+      args:
+        - HTTP_PROXY
+        - HTTPS_PROXY
+        - NO_PROXY
+    image: wol-dashboard:host
+    container_name: wol-dashboard-host
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - SCAN_INTERVAL=30
+      - CONFIG_PATH=/app/config/devices.yaml
+      - PORT=8000
+    volumes:
+      - ./config:/app/config:ro

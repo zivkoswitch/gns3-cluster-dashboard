@@ -1,0 +1,27 @@
+# Kopiere diese Datei nach config/devices.yaml und passe Werte an.
+
+devices:
+  - name: "Server-1"
+    ip: "10.21.34.205"
+    # optional WoL
+    mac: "00:11:22:33:44:55"
+    broadcast: "10.21.34.255"
+    # optional GNS3 API Zugang
+    gns3key:
+      server_url: "http://10.21.34.205:3080"
+      user: "admin"
+      access_token: "<TOKEN>"
+      token_type: "bearer"
+    # optional SSH (für Systemmetriken)
+    ssh:
+      username: "user"
+      password: "user"
+      # port: 22
+
+  - name: "Server-2"
+    ip: "10.21.34.206"
+    gns3key:
+      server_url: "http://10.21.34.206:3080"
+      user: "admin"
+      access_token: "<TOKEN>"
+      token_type: "bearer"
