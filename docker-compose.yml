@@ -1,15 +1,9 @@
-# Docker Compose for WoL dashboard
-# Usage:
-#  - Default (bridge): docker compose up -d
-#  - Linux host network: docker compose --profile hostnet up -d
-
 version: "3.9"
 
 services:
   wol-dashboard:
     build:
       context: .
-      network: host
       args:
         - HTTP_PROXY
         - HTTPS_PROXY
@@ -17,52 +11,9 @@ services:
     image: wol-dashboard:latest
     container_name: wol-dashboard
     restart: unless-stopped
-    ports:
-      - "8000:8000"
-    environment:
-      - SCAN_INTERVAL=15
-      - CONFIG_PATH=/app/config/devices.yaml
-      - PORT=8000
-    volumes:
-      - ./config:/app/config:ro
-
-  # Optional: host networking for Linux to improve UDP broadcast reachability
-  wol-dashboard-host:
-    profiles: ["hostnet"]
-    build:
-      context: .
-      network: host
-      args:
-        - HTTP_PROXY
-        - HTTPS_PROXY
-        - NO_PROXY
-    image: wol-dashboard:host
-    container_name: wol-dashboard-host
-    restart: unless-stopped
-    network_mode: host
-    environment:
-      - SCAN_INTERVAL=15
-      - CONFIG_PATH=/app/config/devices.yaml
-      - PORT=8000
-    volumes:
-      - ./config:/app/config:ro
-
-  # Macvlan-attached service: container gets an IP directly in your LAN
-  wol-dashboard-macvlan:
-    profiles: ["macvlan"]
-    build:
-      context: .
-      args:
-        - HTTP_PROXY
-        - HTTPS_PROXY
-        - NO_PROXY
-    image: wol-dashboard:macvlan
-    container_name: wol-dashboard-macvlan
-    restart: unless-stopped
-    # No port mapping needed; service is reachable via its LAN IP
     networks:
       lan:
-        ipv4_address: 10.21.34.240   # adjust to a free IP in your LAN
+        ipv4_address: 10.21.34.240   # freie IP in deinem LAN
     environment:
       - SCAN_INTERVAL=15
       - CONFIG_PATH=/app/config/devices.yaml
@@ -74,8 +25,8 @@ networks:
   lan:
     driver: macvlan
     driver_opts:
-      parent: eth0            # change to your host NIC (e.g., enp3s0)
+      parent: eth0                 # hier dein Host-Interface einsetzen (z. B. enp3s0)
     ipam:
       config:
-        - subnet: 10.21.34.0/24   # adjust to your LAN
-          gateway: 10.21.34.254     # adjust to your LAN gateway
+        - subnet: 10.21.34.0/24    # dein LAN-Subnetz
+          gateway: 10.21.34.254    # dein Gateway
