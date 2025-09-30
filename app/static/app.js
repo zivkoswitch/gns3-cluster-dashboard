@@ -21,6 +21,7 @@ function render(data) {
   tableBody.innerHTML = '';
   for (const d of devices) {
     const tr = document.createElement('tr');
+    tr.dataset.id = d.id;
     const status = d.up ? '🟢' : '🔴';
     const lastSeen = d.last_seen ? new Date(d.last_seen * 1000).toLocaleString() : '-';
     // Helpers for meters
@@ -88,15 +89,24 @@ function render(data) {
   tableBody.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', async () => {
       btn.disabled = true;
+      const row = btn.closest('tr');
+      const name = row?.children?.[1]?.textContent || '';
+      const mac = btn.dataset.mac || '';
+      showToast(`Sende WOL an ${name || d?.name || ''}${mac ? ' ('+mac+')' : ''}...`, 'info');
       try {
         const payload = { id: btn.dataset.id, mac: btn.dataset.mac, broadcast: btn.dataset.bcast };
         const res = await fetch('/api/wol', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
         const j = await res.json();
         if (!j.ok) {
-          alert('WOL fehlgeschlagen: ' + (j.error || 'Unbekannter Fehler'));
+          showToast('WOL fehlgeschlagen: ' + (j.error || 'Unbekannter Fehler'), 'error');
+        }
+        else {
+          row?.classList.add('flash');
+          setTimeout(() => row?.classList.remove('flash'), 1200);
+          showToast('WOL gesendet' + (mac ? ' ('+mac+')' : ''), 'success');
         }
       } catch (e) {
-        alert('WOL Fehler: ' + e);
+        showToast('WOL Fehler: ' + e, 'error');
       } finally {
         btn.disabled = false;
       }
@@ -111,17 +121,31 @@ if (scanNowBtn) {
   scanNowBtn.addEventListener('click', async () => {
     try {
       scanNowBtn.disabled = true;
+      showToast('Starte Sofort-Scan...', 'info');
       const res = await fetch('/api/scan-now', { method: 'POST' });
       const data = await res.json();
       if (!data.ok) {
-        alert('Scan fehlgeschlagen: ' + (data.error || 'Unbekannter Fehler'));
+        showToast('Scan fehlgeschlagen: ' + (data.error || 'Unbekannter Fehler'), 'error');
       } else {
         render({ devices: data.devices, gns3: null });
+        showToast('Scan abgeschlossen', 'success');
       }
     } catch (e) {
-      alert('Scan Fehler: ' + e);
+      showToast('Scan Fehler: ' + e, 'error');
     } finally {
       scanNowBtn.disabled = false;
     }
   });
+}
+
+// Toast helper
+function showToast(msg, type = 'info') {
+  const box = document.getElementById('toasts');
+  if (!box) return;
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0.0'; el.style.transition = 'opacity .3s'; }, 2500);
+  setTimeout(() => { el.remove(); }, 3000);
 }

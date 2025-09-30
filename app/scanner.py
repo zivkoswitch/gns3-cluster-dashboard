@@ -88,7 +88,8 @@ class NetworkScanner:
                 gns3_url = ""
                 if up:
                     hostname = self._reverse_dns(dev.ip)
-                    mac = mac or self._get_mac(dev.ip)
+                # Try to resolve MAC even if host seems down (ARP cache may still have it)
+                mac = mac or self._get_mac(dev.ip)
                 # Probe GNS3 ports regardless of ICMP ping result (ping may be blocked)
                 gns3_port = self._check_gns3_ports(dev.ip)
                 if gns3_port:

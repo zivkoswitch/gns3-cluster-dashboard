@@ -46,8 +46,37 @@ def create_app() -> Flask:
         if not mac:
             return jsonify({"ok": False, "error": "mac required"}), 400
         try:
-            send_magic_packet(mac, broadcast_ip=broadcast or None)
-            return jsonify({"ok": True})
+            # Build a set of candidate broadcast targets
+            targets: list[tuple[str, int]] = []
+            def add_targets(bip: str | None):
+                for p in (9, 7):
+                    targets.append(((bip or "255.255.255.255"), p))
+            # 1) explicit broadcast
+            if broadcast:
+                add_targets(broadcast)
+            # 2) derive from configured IP (assume /24)
+            try:
+                if dev_id:
+                    dev = scanner.get(dev_id)
+                    if dev and dev.ip and dev.ip.count('.') == 3:
+                        parts = dev.ip.split('.')
+                        parts[-1] = '255'
+                        add_targets('.'.join(parts))
+            except Exception:
+                pass
+            # 3) fallback global broadcast
+            add_targets(None)
+            # Deduplicate
+            seen = set()
+            unique_targets = []
+            for t in targets:
+                if t not in seen:
+                    seen.add(t)
+                    unique_targets.append(t)
+            # Send to all candidates
+            for addr, port in unique_targets:
+                send_magic_packet(mac, broadcast_ip=addr, port=port)
+            return jsonify({"ok": True, "sent": unique_targets})
         except Exception as e:
             return jsonify({"ok": False, "error": str(e)}), 500
 

@@ -37,3 +37,14 @@ footer { padding: 8px 20px; color: var(--muted); font-size: 12px; max-width: 120
 /* IP tags */
 .ip-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .ip-tags .tag { background: #eef2ff; color: #1e40af; border: 1px solid #c7d2fe; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+
+/* Toasts */
+.toasts { position: fixed; left: 16px; bottom: 16px; display: grid; gap: 8px; z-index: 1000; }
+.toast { background: #0f172a; color: #fff; padding: 10px 12px; border-radius: 10px; box-shadow: 0 10px 30px rgba(2,6,23,.22); font-size: 13px; }
+.toast.success { background: #065f46; }
+.toast.error { background: #7f1d1d; }
+.toast.info { background: #1e3a8a; }
+
+/* Row flash on action */
+@keyframes flashPulse { 0% { background-color: #ecfeff; } 100% { background-color: transparent; } }
+tr.flash td { animation: flashPulse 1.2s ease-out 1; }
