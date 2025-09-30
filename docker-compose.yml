@@ -20,7 +20,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - SCAN_INTERVAL=30
+      - SCAN_INTERVAL=15
       - CONFIG_PATH=/app/config/devices.yaml
       - PORT=8000
     volumes:
@@ -41,8 +41,41 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      - SCAN_INTERVAL=30
+      - SCAN_INTERVAL=15
       - CONFIG_PATH=/app/config/devices.yaml
       - PORT=8000
     volumes:
       - ./config:/app/config:ro
+
+  # Macvlan-attached service: container gets an IP directly in your LAN
+  wol-dashboard-macvlan:
+    profiles: ["macvlan"]
+    build:
+      context: .
+      args:
+        - HTTP_PROXY
+        - HTTPS_PROXY
+        - NO_PROXY
+    image: wol-dashboard:macvlan
+    container_name: wol-dashboard-macvlan
+    restart: unless-stopped
+    # No port mapping needed; service is reachable via its LAN IP
+    networks:
+      lan:
+        ipv4_address: 10.21.34.240   # adjust to a free IP in your LAN
+    environment:
+      - SCAN_INTERVAL=15
+      - CONFIG_PATH=/app/config/devices.yaml
+      - PORT=8000
+    volumes:
+      - ./config:/app/config:ro
+
+networks:
+  lan:
+    driver: macvlan
+    driver_opts:
+      parent: eth0            # change to your host NIC (e.g., enp3s0)
+    ipam:
+      config:
+        - subnet: 10.21.34.0/24   # adjust to your LAN
+          gateway: 10.21.34.254     # adjust to your LAN gateway
